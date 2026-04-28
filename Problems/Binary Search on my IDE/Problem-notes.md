@@ -57,3 +57,6 @@ Every step cuts n in half — this is the inverse of 2^n, which is **log₂n**.
  
 - **Element not in array** → when `left > right`, return `-1`
 - **Empty array** → handled automatically (`left=0 > right=-1`)
+
+## Recursion vs Iteration
+The recursive version is more elegant and easier to understand, but it uses O(log n) space due to the call stack. The iterative version uses O(1) space. In attempt 3, I implemented the iterative version of binary search, which avoids the overhead of recursive calls and uses constant space. The logic remains the same, but instead of calling the function recursively, we use a loop to adjust the left and right pointers until we find the target element or determine that it doesn't exist in the array.
