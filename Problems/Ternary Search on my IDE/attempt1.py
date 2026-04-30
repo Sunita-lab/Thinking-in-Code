@@ -4,14 +4,15 @@ arr = list(map(int, input().split()))
 
 def ternary_search(arr):
     left, right = 0, len(arr)-1
-    mid = (left + right) // 2
+    
     while left != right:
-        mid1 = (left + mid) // 2
-        mid2 = (right + mid) // 2
-        if mid1 < mid2:
-            left = mid1
-        elif mid1 > mid2:
-            right = mid2
+        m = (right - left + 1)//3
+        mid1 = left + m
+        mid2 = right - m
+        if arr[mid1] < arr[mid2]:
+            left = mid1 + 1
+        elif arr[mid1] > arr[mid2]:
+            right = mid2 - 1
         else:
             left = mid1
             right = mid2
@@ -20,7 +21,7 @@ def ternary_search(arr):
         return left
 
 result = ternary_search(arr)
-print(f"The peak element is : {result}")                    
+print(f"The peak element is : {arr[result]} at index: {result}")                    
 
 
 
