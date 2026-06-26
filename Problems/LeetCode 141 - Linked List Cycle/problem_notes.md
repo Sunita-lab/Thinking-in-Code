@@ -40,6 +40,7 @@ koi pointer usse wapas nahi laata — `None` inevitable hai.
 ---
 
 ## Code
+### Link - https://leetcode.com/problems/linked-list-cycle/submissions/2047199613/
 
 ```python
 fast = head
