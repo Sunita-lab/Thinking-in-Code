@@ -1,0 +1,130 @@
+# Stock Buy and Sell — Concept Notes
+
+**Week:** 9 | Day 5  
+**Topic:** Stock problems — greedy version, non-greedy versions, and why the constraint matters differently in each
+
+---
+
+## What is the Stock Problem?
+
+Given daily stock prices, buy and sell a single stock to maximize profit. The core constraint across all versions — **you must sell before you can buy again** (at most one stock held at a time).
+
+Different versions exist based on how many transactions are allowed. This changes whether greedy works or not.
+
+---
+
+## Version 1 — Single Transaction (LC 121)
+
+Buy once, sell once. Maximize profit from one buy-sell pair.
+
+**Is it greedy?** Not exactly — it's a simple linear scan. Track the minimum price seen so far, and at each day compute `current_price - min_so_far`. Return the maximum of these values.
+
+No sorting, no ratio — just a running minimum. Greedy in spirit (make the best local decision at each step) but typically categorized as an array/DP problem.
+
+**Does the "one stock at a time" constraint matter here?** Yes — but trivially. Since only one transaction is allowed, there's nothing complex to track. Buy once, sell once, done.
+
+---
+
+## Version 2 — Unlimited Transactions (LC 122, GFG this week)
+
+Buy and sell as many times as you want. Maximize total profit.
+
+**Is it greedy?** Yes — this is the version covered this week.
+
+**Greedy rule:** Add every consecutive positive difference. If `price[i] > price[i-1]`, that difference is profit — take it.
+
+**Why greedy works:** Any longer hold (buy day 1, sell day 5) gives the same profit as collecting every consecutive gain between day 1 and day 5. Mathematically:
+```
+price[5] - price[1] = (price[2]-price[1]) + (price[3]-price[2]) + (price[4]-price[3]) + (price[5]-price[4])
+```
+So there's no benefit to "waiting" — just collect every upward move.
+
+**Does the "one stock at a time" constraint need to be tracked?**
+
+This was the key insight derived during the session — **no, it does not need to be explicitly tracked.** The consecutive difference approach implicitly satisfies the constraint. "Stranded" stocks (bought but not sold) contribute 0 profit and don't affect the answer. Trying to physically simulate every buy/sell action adds complexity without changing the result.
+
+**The deeper lesson:** Sometimes simulating a constraint is unnecessary — only its mathematical effect on the answer matters. This is a common greedy insight.
+
+---
+
+## Version 3 — At Most 2 Transactions (LC 123)
+
+Buy and sell at most twice. Maximize profit.
+
+**Is it greedy?** No — DP needed.
+
+**Why greedy fails:** With only 2 transactions allowed, the choice of when to use each transaction affects what's available for the other. A greedy choice (take the most profitable single transaction first) might leave a suboptimal second transaction, missing a better combined profit from two different transaction windows.
+
+**Does the "one stock at a time" constraint need to be tracked?** Yes — now it matters explicitly. The two transactions cannot overlap, and DP needs to track how many transactions have been used at each state.
+
+---
+
+## Version 4 — At Most K Transactions (LC 188)
+
+Generalization of Version 3 — at most `k` buy-sell pairs.
+
+**Is it greedy?** No — DP needed (generalized from Version 3).
+
+**Why greedy fails:** Same reason as Version 3 — limited transactions mean each choice affects the remaining budget. The interaction between transactions cannot be resolved greedily.
+
+**Does the "one stock at a time" constraint need to be tracked?** Yes — DP states include both the day and the number of transactions used.
+
+---
+
+## Version 5 — With Cooldown (LC 309)
+
+After selling, must wait one day before buying again (cooldown period).
+
+**Is it greedy?** No — DP needed.
+
+**Why greedy fails:** The cooldown creates a dependency between consecutive decisions. Whether to sell today depends on what's possible two days later, which greedy cannot evaluate.
+
+**Does the "one stock at a time" constraint need to be tracked?** Yes — plus the cooldown state.
+
+---
+
+## Version 6 — With Transaction Fee (LC 714)
+
+Each buy-sell pair costs a fixed fee. Maximize profit after fees.
+
+**Is it greedy?** Borderline — can be solved greedily with some care, but DP is the standard approach.
+
+**Why it's tricky:** The fee changes whether a small consecutive gain is worth taking. Unlike Version 2 where every positive difference is profit, here some small gains are wiped out by the fee. Greedy needs to account for this.
+
+---
+
+## Why Greedy Only Works for Unlimited Transactions
+
+The pattern is clear across versions:
+
+| Version | Transactions | Greedy? | Why |
+|---|---|---|---|
+| LC 121 | 1 | Partial | Single scan, no complex interaction |
+| LC 122 | Unlimited | ✅ Yes | Every gain is independent, no transaction budget |
+| LC 123 | ≤ 2 | ❌ No | Transactions interact, limited budget |
+| LC 188 | ≤ k | ❌ No | Generalized interaction |
+| LC 309 | Unlimited + cooldown | ❌ No | Cooldown creates state dependency |
+| LC 714 | Unlimited + fee | ❌ No | Fee makes small gains ambiguous |
+
+**The key:** Greedy works when **every decision is independent** — taking a gain today doesn't affect how many gains you can take tomorrow. In LC 122, transactions are unlimited so there's no budget constraint creating dependency. The moment a constraint limits how many transactions you can make (or adds cooldown/fee), decisions become interdependent and DP is needed.
+
+---
+
+## The "One Stock at a Time" Constraint — When Does It Actually Matter?
+
+This constraint exists in **all versions** but its impact varies:
+
+- **LC 122 (this week):** Doesn't need explicit tracking — mathematical equivalence makes it irrelevant for computation. Consecutive differences automatically respect it.
+- **All other versions:** Needs explicit tracking — DP states must encode whether a stock is currently held, how many transactions have been used, and sometimes the cooldown state.
+
+The realization from this session — **whether to track a constraint depends on whether its simulation changes the answer.** In unlimited transactions, it doesn't. In limited transactions, it does.
+
+---
+
+## Summary
+
+- Stock Buy & Sell is a family of problems — greedy only works for the unlimited transactions version (LC 122)
+- Greedy rule — collect every consecutive positive price difference
+- The "one stock at a time" constraint doesn't need explicit tracking in the greedy version — stranded stocks contribute 0 and don't affect profit
+- All other versions (limited transactions, cooldown, fee) require DP because decisions become interdependent
+- The deeper insight — simulating a constraint is only necessary when it changes the answer; sometimes only its mathematical effect matters
