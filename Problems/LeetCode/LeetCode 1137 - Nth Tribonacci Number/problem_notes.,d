@@ -1,0 +1,93 @@
+# N-th Tribonacci Number (LC 1137)
+
+**Day:** Week 17, Day 1 — DP Foundations
+**Status:** Solved independently, first try correct
+
+---
+
+## Problem Statement
+
+`T(0)=0, T(1)=1, T(2)=1`, `T(n) = T(n-1)+T(n-2)+T(n-3)` for `n>=3`. Find `T(n)`.
+
+---
+
+## Approach
+
+Directly applied the generalized rolling-DP rule derived in the previous problem (see `general_concepts/rolling_dp_loop_range_derivation.md`) without being told to — extended from a 2-term window to a 3-term window on the first attempt.
+
+Reasoning applied (self-directed):
+- Base cases `T(0), T(1), T(2)` are explicitly known → `k = 2`
+- Need 3 rolling variables instead of 2: `prev1, prev2, prev3` representing `T(0), T(1), T(2)`
+- Applied "Option B" from the generalized rule: `range(k+1, n+1)` = `range(3, n+1)`, and since the loop runs the rolling variable all the way, `prev3` itself becomes the answer at the end → `return prev3`
+
+---
+
+## Code Attempts
+
+### Attempt 1 (with explicit n==2 base case)
+```python
+class Solution:
+    def tribonacci(self, n: int) -> int:
+        if n == 0 or n == 1:
+            return n
+        if n == 2:
+            return 1
+        prev1 = 0
+        prev2 = 1
+        prev3 = 1
+        for i in range(3, n+1):
+            temp = prev1 + prev2 + prev3
+            prev1 = prev2
+            prev2 = prev3
+            prev3 = temp
+        return prev3
+```
+Verified correct via trace for n=0 through 9 (bash), all matched actual Tribonacci values.
+
+### Final — Simplified (n==2 base case removed)
+Realized `n==2` didn't need an explicit check — when `n=2`, `range(3,3)` is empty (loop never runs), and `prev3` is already initialized to `T(2)=1`, so it returns correctly on its own.
+
+```python
+class Solution:
+    def tribonacci(self, n: int) -> int:
+        if n == 0 or n == 1:
+            return n
+        prev1 = 0
+        prev2 = 1
+        prev3 = 1
+        for i in range(3, n+1):
+            temp = prev1 + prev2 + prev3
+            prev1 = prev2
+            prev2 = prev3
+            prev3 = temp
+        return prev3
+```
+Re-verified via trace (bash) — identical outputs to the version with the explicit `n==2` check, for n=0 through 9.
+
+---
+
+## Complexity
+
+- **Time:** O(n)
+- **Space:** O(1) — three rolling variables
+
+---
+
+## Mid-way Doubts
+
+None significant — the generalized rule from the previous problem transferred cleanly without needing new derivation.
+
+## Syntax / Python Concepts Touched
+
+- Tuple unpacking for simultaneous rolling-variable update: `prev1, prev2, prev3 = prev2, prev3, temp` — extends the 2-variable rolling pattern to 3 variables.
+
+## Key Insight / Learning
+
+When a rolling variable is initialized directly from a base-case value (e.g., `prev3 = T(2)`), an explicit `if n == <that base case>` check is often redundant — if the loop's range naturally comes out empty for that `n`, the already-initialized rolling variable IS the correct answer on its own. Checked this by removing the explicit check and re-verifying against actual values — no behavior change, just less code.
+
+This is the same pattern as climbStairs, where `n==2` could similarly have been left to fall out of the loop's empty range rather than being special-cased — confirms it's a general property of this rolling-DP structure, not a one-off coincidence.
+
+## Aage ke liye Learning
+
+- Before adding an explicit base-case `if`, check whether the rolling variables' initialization + an empty-range loop already produces the correct answer for that case — avoids redundant code.
+- The 2-term → 3-term extension pattern (more rolling variables, same `k+1` to `n+1` range logic) should extend further to any fixed-window linear recurrence (4-term, 5-term, etc.) the same way.
